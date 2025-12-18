@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Photosynthesis Simulator</title>
+    <title>3D Photosynthesis Simulator - Advanced Model</title>
     <style>
         * {
             margin: 0;
@@ -27,84 +27,98 @@
             z-index: 1;
         }
 
-        /* UI Overlay */
-        .ui-overlay {
-            position: fixed;
-            z-index: 100;
-            pointer-events: none;
-        }
-
-        .ui-overlay > * {
-            pointer-events: auto;
-        }
-
         /* Header */
         .header {
+            position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
+            z-index: 100;
         }
 
         .header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             background: linear-gradient(90deg, #4ade80, #22d3ee);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
         }
 
         .header .subtitle {
             color: #64748b;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-top: 5px;
         }
 
         /* Control Panel */
         .control-panel {
             position: fixed;
-            top: 100px;
+            top: 90px;
             right: 20px;
-            width: 280px;
-            background: rgba(15, 23, 42, 0.95);
+            width: 260px;
+            background: rgba(10, 15, 30, 0.95);
             border-radius: 16px;
-            padding: 20px;
+            padding: 16px;
             border: 1px solid #334155;
             backdrop-filter: blur(10px);
             z-index: 100;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .control-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .control-panel::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        .panel-section {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .panel-title {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             color: #4ade80;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .control-group {
-            margin-bottom: 18px;
+            margin-bottom: 12px;
         }
 
         .control-label {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: #94a3b8;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .control-value {
             color: #4ade80;
             font-weight: bold;
+            font-size: 0.75rem;
         }
 
         input[type="range"] {
             width: 100%;
-            height: 6px;
+            height: 5px;
             border-radius: 3px;
             background: #334155;
             outline: none;
@@ -113,26 +127,25 @@
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #4ade80;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
         }
 
         .btn-group {
             display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 6px;
+            margin-bottom: 12px;
         }
 
         .btn {
             flex: 1;
-            padding: 10px;
+            padding: 8px;
             border: none;
-            border-radius: 8px;
-            font-size: 0.85rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
@@ -143,59 +156,79 @@
             color: #000;
         }
 
-        .btn-primary:hover {
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
-        }
-
         .btn-secondary {
             background: #334155;
             color: #fff;
         }
 
-        .btn-secondary:hover {
-            background: #475569;
+        /* Spectrum Display */
+        .spectrum-bar {
+            height: 20px;
+            border-radius: 4px;
+            background: linear-gradient(90deg,
+                #7c00ff 0%, #0000ff 15%, #00ffff 30%,
+                #00ff00 45%, #ffff00 60%, #ff7f00 75%, #ff0000 100%);
+            position: relative;
+            margin: 8px 0;
         }
 
-        /* Molecule Counters */
+        .spectrum-indicator {
+            position: absolute;
+            top: -4px;
+            width: 4px;
+            height: 28px;
+            background: white;
+            border-radius: 2px;
+            transition: left 0.3s;
+        }
+
+        .spectrum-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: #64748b;
+        }
+
+        /* Counters */
         .counters {
             background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 15px;
+            border-radius: 8px;
+            padding: 10px;
         }
 
         .counter-title {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #64748b;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .counter-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
         }
 
         .counter-item {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.05);
-            padding: 6px 8px;
+            background: rgba(255,255,255,0.03);
+            padding: 6px;
             border-radius: 6px;
         }
 
         .counter-icon {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.55rem;
+            font-size: 0.5rem;
             font-weight: bold;
+            margin-bottom: 2px;
         }
 
         .counter-icon.water { background: #2563eb; }
@@ -206,8 +239,71 @@
         .counter-icon.glucose { background: #eab308; color: #000; }
 
         .counter-value {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
+        }
+
+        .counter-label {
+            font-size: 0.6rem;
+            color: #64748b;
+        }
+
+        /* Proton Gradient Meter */
+        .gradient-meter {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .gradient-bar {
+            height: 24px;
+            background: linear-gradient(90deg, #1e293b 0%, #7c3aed 100%);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7, #c084fc);
+            width: 0%;
+            transition: width 0.5s;
+            border-radius: 4px;
+        }
+
+        .gradient-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Energy Indicators */
+        .energy-display {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .energy-item {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .energy-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+
+        .energy-label {
+            font-size: 0.6rem;
+            color: #64748b;
         }
 
         /* Info Panel */
@@ -215,76 +311,81 @@
             position: fixed;
             bottom: 20px;
             left: 20px;
-            width: 400px;
-            background: rgba(15, 23, 42, 0.95);
+            width: 380px;
+            background: rgba(10, 15, 30, 0.95);
             border-radius: 16px;
-            padding: 20px;
+            padding: 16px;
             border: 1px solid #334155;
             backdrop-filter: blur(10px);
             z-index: 100;
         }
 
         .info-title {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #4ade80;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .info-text {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #94a3b8;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .equation {
             background: rgba(74, 222, 128, 0.1);
             border: 1px solid rgba(74, 222, 128, 0.3);
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 6px;
+            padding: 8px;
             text-align: center;
-            margin-top: 12px;
+            margin-top: 10px;
             font-family: 'Courier New', monospace;
-        }
-
-        .equation-main {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #4ade80;
         }
 
         /* Legend Panel */
         .legend-panel {
             position: fixed;
-            top: 100px;
+            top: 90px;
             left: 20px;
-            width: 220px;
-            background: rgba(15, 23, 42, 0.95);
+            width: 200px;
+            background: rgba(10, 15, 30, 0.95);
             border-radius: 16px;
-            padding: 15px;
+            padding: 14px;
             border: 1px solid #334155;
             backdrop-filter: blur(10px);
             z-index: 100;
         }
 
         .legend-title {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #4ade80;
+            margin-bottom: 10px;
+        }
+
+        .legend-section {
             margin-bottom: 12px;
+        }
+
+        .legend-section-title {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-bottom: 6px;
+            text-transform: uppercase;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            font-size: 0.75rem;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 0.7rem;
             color: #94a3b8;
-            padding: 6px;
-            border-radius: 6px;
+            padding: 4px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.2s;
         }
 
         .legend-item:hover {
@@ -292,9 +393,9 @@
         }
 
         .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
             flex-shrink: 0;
         }
 
@@ -304,28 +405,34 @@
             bottom: 20px;
             right: 20px;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
             z-index: 100;
         }
 
+        .view-row {
+            display: flex;
+            gap: 8px;
+        }
+
         .view-btn {
-            padding: 10px 15px;
-            background: rgba(15, 23, 42, 0.95);
+            padding: 8px 12px;
+            background: rgba(10, 15, 30, 0.95);
             border: 1px solid #334155;
-            border-radius: 10px;
+            border-radius: 8px;
             color: #94a3b8;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             transition: all 0.3s;
         }
 
-        .view-btn:hover, .view-btn.active {
+        .view-btn:hover {
             background: #4ade80;
             color: #000;
             border-color: #4ade80;
         }
 
-        /* Loading Screen */
+        /* Loading */
         .loading {
             position: fixed;
             inset: 0;
@@ -344,17 +451,18 @@
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #334155;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #334155;
             border-top-color: #4ade80;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         .loading-text {
-            margin-top: 20px;
+            margin-top: 15px;
             color: #4ade80;
+            font-size: 0.9rem;
         }
 
         @keyframes spin {
@@ -364,17 +472,17 @@
         /* Tooltip */
         .tooltip {
             position: fixed;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(10, 15, 30, 0.98);
             border: 1px solid #4ade80;
             border-radius: 8px;
-            padding: 10px 15px;
+            padding: 12px;
             color: #fff;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             pointer-events: none;
             z-index: 200;
             opacity: 0;
             transition: opacity 0.2s;
-            max-width: 250px;
+            max-width: 280px;
         }
 
         .tooltip.visible {
@@ -384,107 +492,207 @@
         .tooltip-title {
             color: #4ade80;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+
+        .tooltip-detail {
+            color: #64748b;
+            font-size: 0.7rem;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #1e293b;
         }
 
         /* Instructions */
         .instructions {
             position: fixed;
-            bottom: 20px;
+            bottom: 70px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.8);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            background: rgba(10, 15, 30, 0.8);
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 0.7rem;
             color: #64748b;
             z-index: 100;
+        }
+
+        /* Molecule info overlay */
+        .molecule-info {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 15, 30, 0.98);
+            border: 2px solid #4ade80;
+            border-radius: 16px;
+            padding: 24px;
+            z-index: 300;
+            display: none;
+            max-width: 400px;
+        }
+
+        .molecule-info.visible {
+            display: block;
+        }
+
+        .molecule-info-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="loading" id="loading">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading 3D Chloroplast...</div>
+        <div class="loading-text">Loading Advanced 3D Model...</div>
     </div>
 
     <div id="canvas-container"></div>
 
     <!-- Header -->
-    <div class="ui-overlay header">
+    <div class="header">
         <h1>3D Photosynthesis Simulator</h1>
-        <p class="subtitle">Interactive Cellular Model - Rotate &amp; Zoom to Explore</p>
+        <p class="subtitle">Advanced Cellular Model with Electron Transport Chain</p>
     </div>
 
     <!-- Control Panel -->
     <div class="control-panel">
-        <div class="panel-title">⚡ Control Panel</div>
-
-        <div class="btn-group">
-            <button class="btn btn-primary" id="playPauseBtn" onclick="toggleSimulation()">
-                ▶ Start
-            </button>
-            <button class="btn btn-secondary" onclick="resetSimulation()">
-                ↺ Reset
-            </button>
-        </div>
-
-        <div class="control-group">
-            <div class="control-label">
-                <span>☀️ Light Intensity</span>
-                <span class="control-value" id="lightValue">75%</span>
+        <div class="panel-section">
+            <div class="panel-title">⚡ Simulation</div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="playPauseBtn" onclick="toggleSimulation()">▶ Start</button>
+                <button class="btn btn-secondary" onclick="resetSimulation()">↺ Reset</button>
             </div>
-            <input type="range" id="lightIntensity" min="0" max="100" value="75" oninput="updateLight(this.value)">
-        </div>
 
-        <div class="control-group">
-            <div class="control-label">
-                <span>💨 CO₂ Level</span>
-                <span class="control-value" id="co2Value">400 ppm</span>
-            </div>
-            <input type="range" id="co2Level" min="100" max="800" value="400" oninput="updateCO2(this.value)">
-        </div>
-
-        <div class="control-group">
-            <div class="control-label">
-                <span>⏱️ Speed</span>
-                <span class="control-value" id="speedValue">1x</span>
-            </div>
-            <input type="range" id="simSpeed" min="0.5" max="3" step="0.5" value="1" oninput="updateSpeed(this.value)">
-        </div>
-
-        <div class="counters">
-            <div class="counter-title">Produced</div>
-            <div class="counter-grid">
-                <div class="counter-item">
-                    <div class="counter-icon o2">O₂</div>
-                    <span class="counter-value" id="o2Count">0</span>
+            <div class="control-group">
+                <div class="control-label">
+                    <span>⏱️ Speed</span>
+                    <span class="control-value" id="speedValue">1x</span>
                 </div>
-                <div class="counter-item">
-                    <div class="counter-icon atp">ATP</div>
-                    <span class="counter-value" id="atpCount">0</span>
-                </div>
-                <div class="counter-item">
-                    <div class="counter-icon nadph">N</div>
-                    <span class="counter-value" id="nadphCount">0</span>
-                </div>
-                <div class="counter-item">
-                    <div class="counter-icon glucose">G</div>
-                    <span class="counter-value" id="glucoseCount">0</span>
-                </div>
+                <input type="range" id="simSpeed" min="0.25" max="3" step="0.25" value="1" oninput="updateSpeed(this.value)">
             </div>
         </div>
 
-        <div class="counters">
-            <div class="counter-title">Consumed</div>
-            <div class="counter-grid">
-                <div class="counter-item">
-                    <div class="counter-icon water">H₂O</div>
-                    <span class="counter-value" id="waterCount">0</span>
+        <div class="panel-section">
+            <div class="panel-title">☀️ Light Conditions</div>
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Intensity</span>
+                    <span class="control-value" id="lightValue">1000 μmol·m⁻²·s⁻¹</span>
                 </div>
-                <div class="counter-item">
-                    <div class="counter-icon co2">CO₂</div>
-                    <span class="counter-value" id="co2Count">0</span>
+                <input type="range" id="lightIntensity" min="0" max="2000" value="1000" oninput="updateLight(this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Wavelength</span>
+                    <span class="control-value" id="wavelengthValue">680 nm (Red)</span>
+                </div>
+                <input type="range" id="wavelength" min="400" max="700" value="680" oninput="updateWavelength(this.value)">
+            </div>
+
+            <div class="spectrum-bar">
+                <div class="spectrum-indicator" id="spectrumIndicator" style="left: 93%"></div>
+            </div>
+            <div class="spectrum-labels">
+                <span>400nm</span>
+                <span>550nm</span>
+                <span>700nm</span>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-title">🌡️ Environment</div>
+            <div class="control-group">
+                <div class="control-label">
+                    <span>CO₂ Concentration</span>
+                    <span class="control-value" id="co2Value">400 ppm</span>
+                </div>
+                <input type="range" id="co2Level" min="100" max="1000" value="400" oninput="updateCO2(this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Temperature</span>
+                    <span class="control-value" id="tempValue">25°C</span>
+                </div>
+                <input type="range" id="temperature" min="10" max="40" value="25" oninput="updateTemp(this.value)">
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-title">📊 Molecule Counts</div>
+            <div class="counters">
+                <div class="counter-title">Produced</div>
+                <div class="counter-grid">
+                    <div class="counter-item">
+                        <div class="counter-icon o2">O₂</div>
+                        <span class="counter-value" id="o2Count">0</span>
+                        <span class="counter-label">Oxygen</span>
+                    </div>
+                    <div class="counter-item">
+                        <div class="counter-icon atp">⚡</div>
+                        <span class="counter-value" id="atpCount">0</span>
+                        <span class="counter-label">ATP</span>
+                    </div>
+                    <div class="counter-item">
+                        <div class="counter-icon nadph">N</div>
+                        <span class="counter-value" id="nadphCount">0</span>
+                        <span class="counter-label">NADPH</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="counters" style="margin-top: 8px;">
+                <div class="counter-title">Consumed</div>
+                <div class="counter-grid">
+                    <div class="counter-item">
+                        <div class="counter-icon water">💧</div>
+                        <span class="counter-value" id="waterCount">0</span>
+                        <span class="counter-label">H₂O</span>
+                    </div>
+                    <div class="counter-item">
+                        <div class="counter-icon co2">C</div>
+                        <span class="counter-value" id="co2Count">0</span>
+                        <span class="counter-label">CO₂</span>
+                    </div>
+                    <div class="counter-item">
+                        <div class="counter-icon glucose" style="background: #eab308;">G</div>
+                        <span class="counter-value" id="glucoseCount">0</span>
+                        <span class="counter-label">Glucose</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-title">⚗️ Proton Gradient (ΔpH)</div>
+            <div class="gradient-meter">
+                <div class="gradient-bar">
+                    <div class="gradient-fill" id="protonGradient"></div>
+                </div>
+                <div class="gradient-label">
+                    <span>Stroma (pH 8)</span>
+                    <span>Lumen (pH 5)</span>
+                </div>
+            </div>
+
+            <div class="energy-display">
+                <div class="energy-item">
+                    <div class="energy-value" id="pmfValue">0</div>
+                    <div class="energy-label">PMF (mV)</div>
+                </div>
+                <div class="energy-item">
+                    <div class="energy-value" id="atpRate">0</div>
+                    <div class="energy-label">ATP/sec</div>
                 </div>
             </div>
         </div>
@@ -492,30 +700,54 @@
 
     <!-- Legend Panel -->
     <div class="legend-panel">
-        <div class="legend-title">🔬 Structures</div>
-        <div class="legend-item" onclick="focusOn('psii')">
-            <div class="legend-color" style="background: #7c3aed;"></div>
-            <span>Photosystem II (P680)</span>
+        <div class="legend-title">🔬 Components</div>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Protein Complexes</div>
+            <div class="legend-item" onclick="focusOn('psii')">
+                <div class="legend-color" style="background: #7c3aed;"></div>
+                <span>Photosystem II</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('pq')">
+                <div class="legend-color" style="background: #f97316;"></div>
+                <span>Plastoquinone Pool</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('cytb6f')">
+                <div class="legend-color" style="background: #dc2626;"></div>
+                <span>Cytochrome b6f</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('pc')">
+                <div class="legend-color" style="background: #06b6d4;"></div>
+                <span>Plastocyanin</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('psi')">
+                <div class="legend-color" style="background: #2563eb;"></div>
+                <span>Photosystem I</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('fd')">
+                <div class="legend-color" style="background: #84cc16;"></div>
+                <span>Ferredoxin</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('atpSynthase')">
+                <div class="legend-color" style="background: #eab308;"></div>
+                <span>ATP Synthase</span>
+            </div>
         </div>
-        <div class="legend-item" onclick="focusOn('cytb6f')">
-            <div class="legend-color" style="background: #dc2626;"></div>
-            <span>Cytochrome b6f</span>
-        </div>
-        <div class="legend-item" onclick="focusOn('psi')">
-            <div class="legend-color" style="background: #2563eb;"></div>
-            <span>Photosystem I (P700)</span>
-        </div>
-        <div class="legend-item" onclick="focusOn('atpSynthase')">
-            <div class="legend-color" style="background: #ea580c;"></div>
-            <span>ATP Synthase</span>
-        </div>
-        <div class="legend-item" onclick="focusOn('calvin')">
-            <div class="legend-color" style="background: #22d3ee;"></div>
-            <span>Calvin Cycle (Stroma)</span>
-        </div>
-        <div class="legend-item" onclick="focusOn('thylakoid')">
-            <div class="legend-color" style="background: #22c55e;"></div>
-            <span>Thylakoid Membrane</span>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Structures</div>
+            <div class="legend-item" onclick="focusOn('calvin')">
+                <div class="legend-color" style="background: #22d3ee;"></div>
+                <span>Calvin Cycle</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('dna')">
+                <div class="legend-color" style="background: #f472b6;"></div>
+                <span>Chloroplast DNA</span>
+            </div>
+            <div class="legend-item" onclick="focusOn('starch')">
+                <div class="legend-color" style="background: #fef3c7;"></div>
+                <span>Starch Granules</span>
+            </div>
         </div>
     </div>
 
@@ -523,30 +755,37 @@
     <div class="info-panel">
         <div class="info-title">📚 Current Process</div>
         <div class="info-text" id="processInfo">
-            Click <strong>Start</strong> to begin. Light energy drives electron transport in the thylakoid membrane, producing ATP and NADPH. These power the Calvin Cycle in the stroma to fix CO₂ into glucose.
+            Click <strong>Start</strong> to begin the simulation. Light energy excites electrons in chlorophyll, initiating the electron transport chain. The resulting proton gradient drives ATP synthesis via chemiosmosis.
         </div>
-        <div class="equation">
-            <div class="equation-main">6CO₂ + 6H₂O + Light → C₆H₁₂O₆ + 6O₂</div>
-        </div>
+        <div class="equation">6CO₂ + 12H₂O + Light → C₆H₁₂O₆ + 6O₂ + 6H₂O</div>
     </div>
 
     <!-- View Controls -->
     <div class="view-controls">
-        <button class="view-btn" onclick="setView('overview')">Overview</button>
-        <button class="view-btn" onclick="setView('membrane')">Membrane</button>
-        <button class="view-btn" onclick="setView('calvin')">Calvin Cycle</button>
-        <button class="view-btn" onclick="setView('cross')">Cross Section</button>
+        <div class="view-row">
+            <button class="view-btn" onclick="setView('overview')">Overview</button>
+            <button class="view-btn" onclick="setView('membrane')">Membrane</button>
+        </div>
+        <div class="view-row">
+            <button class="view-btn" onclick="setView('etc')">ETC Detail</button>
+            <button class="view-btn" onclick="setView('calvin')">Calvin Cycle</button>
+        </div>
+        <div class="view-row">
+            <button class="view-btn" onclick="setView('cross')">Cross Section</button>
+            <button class="view-btn" onclick="toggleAutoRotate()">Auto Rotate</button>
+        </div>
     </div>
 
     <!-- Instructions -->
     <div class="instructions">
-        🖱️ Left-click + drag to rotate | Scroll to zoom | Right-click + drag to pan
+        🖱️ Drag to rotate | Scroll to zoom | Right-click to pan | Click structures for details
     </div>
 
     <!-- Tooltip -->
     <div class="tooltip" id="tooltip">
         <div class="tooltip-title" id="tooltipTitle"></div>
         <div id="tooltipContent"></div>
+        <div class="tooltip-detail" id="tooltipDetail"></div>
     </div>
 
     <!-- Three.js -->
@@ -558,171 +797,249 @@
         let scene, camera, renderer, controls;
         let chloroplast, thylakoidGroup, proteinComplexes = {};
         let molecules = [];
+        let particles = [];
         let isRunning = false;
+        let autoRotate = false;
         let simulationSpeed = 1;
-        let lightIntensity = 75;
+        let lightIntensity = 1000;
+        let wavelength = 680;
         let co2Level = 400;
+        let temperature = 25;
+        let protonGradient = 0;
         let clock = new THREE.Clock();
 
         // Counters
         let counts = { o2: 0, atp: 0, nadph: 0, glucose: 0, water: 0, co2: 0 };
 
-        // Process descriptions
+        // Efficiency based on conditions
+        function getEfficiency() {
+            // Light efficiency (peaks at ~1000-1500)
+            let lightEff = lightIntensity > 0 ? Math.min(1, lightIntensity / 1000) : 0;
+            if (lightIntensity > 1500) lightEff *= 1 - (lightIntensity - 1500) / 2000; // photoinhibition
+
+            // Wavelength efficiency (peaks at 680nm and 450nm - absorption peaks)
+            let waveEff = 0.3;
+            if (wavelength >= 640 && wavelength <= 700) waveEff = 1 - Math.abs(wavelength - 680) / 100;
+            else if (wavelength >= 420 && wavelength <= 480) waveEff = 0.9 - Math.abs(wavelength - 450) / 100;
+
+            // Temperature efficiency (optimal 25-30°C)
+            let tempEff = 1 - Math.abs(temperature - 27.5) / 25;
+            tempEff = Math.max(0, tempEff);
+
+            // CO2 efficiency
+            let co2Eff = Math.min(1, co2Level / 400);
+
+            return lightEff * waveEff * tempEff * co2Eff;
+        }
+
+        // Process descriptions with more detail
         const processDescriptions = [
-            "💡 <strong>Light Absorption:</strong> Photons strike chlorophyll in Photosystem II, exciting electrons to a higher energy state. This initiates the light-dependent reactions.",
-            "💧 <strong>Water Splitting (Photolysis):</strong> At PSII, water molecules are split: 2H₂O → 4H⁺ + 4e⁻ + O₂. Oxygen is released as a byproduct.",
-            "⚡ <strong>Electron Transport Chain:</strong> Excited electrons flow through plastoquinone → Cyt b6f → plastocyanin. Energy released pumps H⁺ into the thylakoid lumen.",
-            "🔵 <strong>Photosystem I:</strong> Electrons are re-energized by light and transferred via ferredoxin to NADP⁺ reductase, producing NADPH.",
-            "🔋 <strong>ATP Synthesis:</strong> The proton gradient drives H⁺ through ATP Synthase. The rotating motor catalyzes: ADP + Pᵢ → ATP (chemiosmosis).",
-            "🌿 <strong>Calvin Cycle - Fixation:</strong> In the stroma, RuBisCO fixes CO₂ to RuBP (5C), producing two 3-PGA molecules (3C each).",
-            "🧪 <strong>Calvin Cycle - Reduction:</strong> ATP and NADPH reduce 3-PGA to G3P. For every 3 CO₂ fixed, one G3P exits to form glucose.",
-            "♻️ <strong>Calvin Cycle - Regeneration:</strong> Remaining G3P molecules use ATP to regenerate RuBP, allowing the cycle to continue."
+            {
+                title: "💡 Light Absorption (Antenna Complex)",
+                text: "Photons are captured by chlorophyll and accessory pigments in the light-harvesting complexes (LHC). Energy is transferred via resonance to the reaction center P680 in Photosystem II.",
+                detail: "Chlorophyll a absorbs best at 430nm (blue) and 680nm (red). Carotenoids absorb 400-500nm and transfer energy to chlorophyll."
+            },
+            {
+                title: "💧 Water Oxidation (OEC)",
+                text: "The Oxygen-Evolving Complex (Mn₄CaO₅ cluster) catalyzes water splitting: 2H₂O → O₂ + 4H⁺ + 4e⁻. This is the source of atmospheric oxygen and provides electrons to replace those lost from P680.",
+                detail: "The OEC cycles through 5 states (S₀-S₄), releasing O₂ after accumulating 4 oxidizing equivalents."
+            },
+            {
+                title: "⚡ Plastoquinone Shuttle",
+                text: "Plastoquinone (PQ) accepts 2 electrons from PSII and 2 H⁺ from the stroma, becoming plastoquinol (PQH₂). It diffuses through the lipid bilayer to cytochrome b6f.",
+                detail: "The PQ pool contains ~7-8 PQ molecules per PSII, allowing buffering between photosystems."
+            },
+            {
+                title: "🔴 Cytochrome b6f Complex (Q-cycle)",
+                text: "PQH₂ is oxidized, releasing 2 H⁺ into the lumen. The Q-cycle doubles proton pumping efficiency. Electrons pass through the Rieske iron-sulfur protein to plastocyanin.",
+                detail: "Cyt b6f contains 2 b-type hemes, 1 c-type heme, and the Rieske [2Fe-2S] cluster."
+            },
+            {
+                title: "🔵 Photosystem I (P700)",
+                text: "Light excites P700, and electrons are transferred through A₀ → A₁ → FX → FA → FB to ferredoxin. Plastocyanin donates electrons to re-reduce P700⁺.",
+                detail: "PSI operates at ~-1.3V, generating strong reducing power for NADP⁺ reduction."
+            },
+            {
+                title: "🟢 Ferredoxin-NADP⁺ Reductase (FNR)",
+                text: "Ferredoxin transfers electrons to FNR, which reduces NADP⁺ + H⁺ → NADPH. Two electrons and one proton from the stroma are needed per NADPH.",
+                detail: "NADPH has a redox potential of -320mV, providing reducing power for CO₂ fixation."
+            },
+            {
+                title: "🔋 ATP Synthase (Chemiosmosis)",
+                text: "The proton-motive force (ΔpH + Δψ ≈ 200mV) drives H⁺ through CF₀. Rotation of the c-ring drives conformational changes in CF₁, catalyzing ATP synthesis.",
+                detail: "About 4 H⁺ are needed per ATP. The c-ring has 14 subunits in chloroplasts."
+            },
+            {
+                title: "🌿 Calvin Cycle - Carbon Fixation",
+                text: "RuBisCO catalyzes: CO₂ + RuBP → 2 × 3-PGA. This is the rate-limiting step and the most abundant enzyme reaction on Earth.",
+                detail: "RuBisCO also has oxygenase activity, leading to photorespiration when O₂/CO₂ ratio is high."
+            },
+            {
+                title: "🧪 Calvin Cycle - Reduction",
+                text: "3-PGA is phosphorylated by ATP to 1,3-BPG, then reduced by NADPH to G3P (glyceraldehyde-3-phosphate). For every 3 CO₂, 6 ATP and 6 NADPH are consumed.",
+                detail: "1 in 6 G3P molecules exits the cycle; the rest regenerate RuBP."
+            },
+            {
+                title: "♻️ Calvin Cycle - Regeneration",
+                text: "5 G3P molecules (15 carbons) are rearranged through a series of reactions to regenerate 3 RuBP molecules (15 carbons), consuming 3 ATP.",
+                detail: "Key enzymes: transketolase, aldolase, sedoheptulose-1,7-bisphosphatase, phosphoribulokinase."
+            }
         ];
         let currentProcess = 0;
 
         // Initialize
         function init() {
-            // Scene
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a1a);
-            scene.fog = new THREE.Fog(0x0a0a1a, 50, 150);
+            scene.background = new THREE.Color(0x050510);
+            scene.fog = new THREE.FogExp2(0x050510, 0.015);
 
-            // Camera
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(30, 20, 40);
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(35, 25, 45);
 
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Controls
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.minDistance = 15;
-            controls.maxDistance = 100;
+            controls.minDistance = 12;
+            controls.maxDistance = 80;
             controls.target.set(0, 0, 0);
 
-            // Lighting
             setupLighting();
-
-            // Create chloroplast
             createChloroplast();
+            createAmbientParticles();
 
-            // Events
             window.addEventListener('resize', onWindowResize);
             renderer.domElement.addEventListener('mousemove', onMouseMove);
+            renderer.domElement.addEventListener('click', onClick);
 
-            // Hide loading
             setTimeout(() => {
                 document.getElementById('loading').classList.add('hidden');
-            }, 1000);
+            }, 1500);
 
-            // Start animation
             animate();
         }
 
         function setupLighting() {
-            // Ambient light
-            const ambient = new THREE.AmbientLight(0x404040, 0.5);
+            const ambient = new THREE.AmbientLight(0x303050, 0.4);
             scene.add(ambient);
 
-            // Main light (sunlight)
-            const sunLight = new THREE.DirectionalLight(0xffffaa, 1);
-            sunLight.position.set(20, 40, 20);
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            sunLight.position.set(30, 50, 30);
             sunLight.castShadow = true;
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 10;
+            sunLight.shadow.camera.far = 100;
             scene.add(sunLight);
 
-            // Fill lights
-            const fillLight1 = new THREE.PointLight(0x4ade80, 0.5, 100);
-            fillLight1.position.set(-20, 10, 20);
-            scene.add(fillLight1);
+            // Green-tinted fill light (chlorophyll glow)
+            const chloroLight = new THREE.PointLight(0x22c55e, 0.6, 60);
+            chloroLight.position.set(0, 5, 0);
+            scene.add(chloroLight);
 
-            const fillLight2 = new THREE.PointLight(0x22d3ee, 0.3, 100);
-            fillLight2.position.set(20, -10, -20);
-            scene.add(fillLight2);
+            // Blue accent light
+            const blueLight = new THREE.PointLight(0x3b82f6, 0.3, 50);
+            blueLight.position.set(-20, 0, 20);
+            scene.add(blueLight);
         }
 
         function createChloroplast() {
             chloroplast = new THREE.Group();
 
-            // Outer membrane (ellipsoid)
-            const outerGeom = new THREE.SphereGeometry(20, 64, 32);
-            outerGeom.scale(1.5, 0.6, 1);
-            const outerMat = new THREE.MeshPhysicalMaterial({
-                color: 0x166534,
-                transparent: true,
-                opacity: 0.3,
-                roughness: 0.2,
-                metalness: 0.1,
-                side: THREE.DoubleSide
-            });
-            const outerMembrane = new THREE.Mesh(outerGeom, outerMat);
-            chloroplast.add(outerMembrane);
-
-            // Inner membrane
-            const innerGeom = new THREE.SphereGeometry(19, 64, 32);
-            innerGeom.scale(1.5, 0.6, 1);
-            const innerMat = new THREE.MeshPhysicalMaterial({
-                color: 0x15803d,
-                transparent: true,
-                opacity: 0.2,
-                roughness: 0.3,
-                side: THREE.DoubleSide
-            });
-            const innerMembrane = new THREE.Mesh(innerGeom, innerMat);
-            chloroplast.add(innerMembrane);
-
-            // Stroma (interior fill)
-            const stromaGeom = new THREE.SphereGeometry(18, 32, 16);
-            stromaGeom.scale(1.5, 0.6, 1);
-            const stromaMat = new THREE.MeshPhysicalMaterial({
-                color: 0x22c55e,
-                transparent: true,
-                opacity: 0.15,
-                roughness: 0.8
-            });
-            const stroma = new THREE.Mesh(stromaGeom, stromaMat);
-            chloroplast.add(stroma);
+            // Outer membrane with more detail
+            createMembranes();
 
             // Thylakoid system
             createThylakoidSystem();
 
-            // Calvin cycle visualization
+            // Calvin cycle
             createCalvinCycle();
 
+            // Chloroplast DNA
+            createChloroplastDNA();
+
+            // Starch granules
+            createStarchGranules();
+
+            // Ribosomes
+            createRibosomes();
+
             scene.add(chloroplast);
+        }
+
+        function createMembranes() {
+            // Outer membrane
+            const outerGeom = new THREE.SphereGeometry(22, 64, 32);
+            outerGeom.scale(1.5, 0.55, 1);
+            const outerMat = new THREE.MeshPhysicalMaterial({
+                color: 0x166534,
+                transparent: true,
+                opacity: 0.25,
+                roughness: 0.3,
+                metalness: 0.1,
+                side: THREE.DoubleSide,
+                envMapIntensity: 0.5
+            });
+            const outer = new THREE.Mesh(outerGeom, outerMat);
+            chloroplast.add(outer);
+
+            // Inner membrane
+            const innerGeom = new THREE.SphereGeometry(21, 64, 32);
+            innerGeom.scale(1.5, 0.55, 1);
+            const innerMat = new THREE.MeshPhysicalMaterial({
+                color: 0x15803d,
+                transparent: true,
+                opacity: 0.2,
+                roughness: 0.4,
+                side: THREE.DoubleSide
+            });
+            const inner = new THREE.Mesh(innerGeom, innerMat);
+            chloroplast.add(inner);
+
+            // Stroma fill
+            const stromaGeom = new THREE.SphereGeometry(20, 32, 16);
+            stromaGeom.scale(1.5, 0.55, 1);
+            const stromaMat = new THREE.MeshPhysicalMaterial({
+                color: 0x166534,
+                transparent: true,
+                opacity: 0.1,
+                roughness: 0.9
+            });
+            chloroplast.add(new THREE.Mesh(stromaGeom, stromaMat));
         }
 
         function createThylakoidSystem() {
             thylakoidGroup = new THREE.Group();
 
-            // Create multiple grana (stacks of thylakoids)
+            // Multiple grana
             const granaPositions = [
-                { x: -15, z: 0 },
-                { x: -5, z: 8 },
-                { x: 5, z: -5 },
-                { x: -8, z: -8 },
-                { x: 10, z: 5 }
+                { x: -18, z: 0, count: 5 },
+                { x: -8, z: 10, count: 4 },
+                { x: 5, z: -8, count: 6 },
+                { x: -10, z: -10, count: 4 },
+                { x: 12, z: 6, count: 5 },
+                { x: 0, z: 0, count: 3 }
             ];
 
-            granaPositions.forEach((pos, index) => {
-                const granum = createGranum(4 + Math.floor(Math.random() * 3));
-                granum.position.set(pos.x, -2, pos.z);
+            granaPositions.forEach((pos, i) => {
+                const granum = createGranum(pos.count);
+                granum.position.set(pos.x, -3 + Math.random(), pos.z);
                 granum.rotation.y = Math.random() * Math.PI;
                 thylakoidGroup.add(granum);
             });
 
-            // Create stroma lamellae (connecting tubes)
+            // Stroma lamellae
             createStromaLamellae();
 
-            // Create main thylakoid membrane with protein complexes (detailed view)
+            // Main detailed membrane section
             createDetailedMembrane();
 
             chloroplast.add(thylakoidGroup);
@@ -732,28 +1049,30 @@
             const granum = new THREE.Group();
 
             for (let i = 0; i < stackCount; i++) {
-                const discGeom = new THREE.CylinderGeometry(4, 4, 0.8, 32);
+                // Thylakoid disc
+                const discGeom = new THREE.CylinderGeometry(3.5, 3.5, 0.6, 32);
                 const discMat = new THREE.MeshPhysicalMaterial({
                     color: 0x059669,
                     roughness: 0.4,
-                    metalness: 0.2
+                    metalness: 0.15,
+                    clearcoat: 0.3
                 });
                 const disc = new THREE.Mesh(discGeom, discMat);
-                disc.position.y = i * 1.2;
+                disc.position.y = i * 1.0;
                 disc.castShadow = true;
-                disc.receiveShadow = true;
                 granum.add(disc);
 
-                // Lumen (inner space)
-                const lumenGeom = new THREE.CylinderGeometry(3.2, 3.2, 0.4, 32);
+                // Lumen (glowing interior)
+                const lumenGeom = new THREE.CylinderGeometry(2.8, 2.8, 0.3, 32);
                 const lumenMat = new THREE.MeshPhysicalMaterial({
                     color: 0x34d399,
+                    emissive: 0x10b981,
+                    emissiveIntensity: 0.2,
                     transparent: true,
-                    opacity: 0.5,
-                    roughness: 0.6
+                    opacity: 0.6
                 });
                 const lumen = new THREE.Mesh(lumenGeom, lumenMat);
-                lumen.position.y = i * 1.2;
+                lumen.position.y = i * 1.0;
                 granum.add(lumen);
             }
 
@@ -761,170 +1080,466 @@
         }
 
         function createStromaLamellae() {
-            // Connecting tubes between grana
-            const tubePoints = [
-                [new THREE.Vector3(-15, -1, 0), new THREE.Vector3(-5, -1, 8)],
-                [new THREE.Vector3(-5, -1, 8), new THREE.Vector3(5, -1, -5)],
-                [new THREE.Vector3(-15, -1, 0), new THREE.Vector3(-8, -1, -8)],
-                [new THREE.Vector3(5, -1, -5), new THREE.Vector3(10, -1, 5)]
+            const connections = [
+                [[-18, 0], [-8, 10]],
+                [[-8, 10], [0, 0]],
+                [[0, 0], [5, -8]],
+                [[-18, 0], [-10, -10]],
+                [[5, -8], [12, 6]]
             ];
 
-            tubePoints.forEach(points => {
-                const curve = new THREE.CatmullRomCurve3(points);
-                const tubeGeom = new THREE.TubeGeometry(curve, 20, 0.3, 8, false);
+            connections.forEach(conn => {
+                const start = new THREE.Vector3(conn[0][0], -2, conn[0][1]);
+                const end = new THREE.Vector3(conn[1][0], -2, conn[1][1]);
+                const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+                mid.y += 1;
+
+                const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+                const tubeGeom = new THREE.TubeGeometry(curve, 20, 0.25, 8, false);
                 const tubeMat = new THREE.MeshPhysicalMaterial({
                     color: 0x10b981,
-                    roughness: 0.5
+                    roughness: 0.5,
+                    transparent: true,
+                    opacity: 0.8
                 });
-                const tube = new THREE.Mesh(tubeGeom, tubeMat);
-                thylakoidGroup.add(tube);
+                thylakoidGroup.add(new THREE.Mesh(tubeGeom, tubeMat));
             });
         }
 
         function createDetailedMembrane() {
-            // Central detailed membrane for showing electron transport
             const membraneGroup = new THREE.Group();
-            membraneGroup.position.set(0, -5, 0);
+            membraneGroup.position.set(0, -6, 0);
 
-            // Membrane base
-            const membraneGeom = new THREE.BoxGeometry(25, 2, 8);
-            const membraneMat = new THREE.MeshPhysicalMaterial({
-                color: 0x059669,
-                roughness: 0.3,
-                metalness: 0.1
-            });
-            const membrane = new THREE.Mesh(membraneGeom, membraneMat);
-            membrane.name = 'thylakoid';
-            membraneGroup.add(membrane);
-
-            // Lumen layer below
-            const lumenGeom = new THREE.BoxGeometry(24, 1, 7);
-            const lumenMat = new THREE.MeshPhysicalMaterial({
-                color: 0x34d399,
-                transparent: true,
-                opacity: 0.6
-            });
-            const lumen = new THREE.Mesh(lumenGeom, lumenMat);
-            lumen.position.y = -1.5;
-            membraneGroup.add(lumen);
+            // Lipid bilayer visualization
+            createLipidBilayer(membraneGroup);
 
             // Protein complexes
             createProteinComplexes(membraneGroup);
 
+            // Lumen space
+            const lumenGeom = new THREE.BoxGeometry(32, 1.5, 10);
+            const lumenMat = new THREE.MeshPhysicalMaterial({
+                color: 0x22d3ee,
+                emissive: 0x06b6d4,
+                emissiveIntensity: 0.15,
+                transparent: true,
+                opacity: 0.4
+            });
+            const lumen = new THREE.Mesh(lumenGeom, lumenMat);
+            lumen.position.y = -2;
+            lumen.name = 'lumen';
+            lumen.userData = {
+                title: 'Thylakoid Lumen',
+                description: 'Acidic compartment (pH ~5) where protons accumulate during electron transport.',
+                detail: 'The proton gradient (ΔpH ≈ 3) provides the driving force for ATP synthesis.'
+            };
+            membraneGroup.add(lumen);
+
             thylakoidGroup.add(membraneGroup);
+        }
+
+        function createLipidBilayer(parent) {
+            // Create phospholipid representations
+            const lipidGroup = new THREE.Group();
+
+            // Top layer
+            for (let x = -15; x <= 15; x += 1.5) {
+                for (let z = -4; z <= 4; z += 1.5) {
+                    if (Math.random() > 0.3) {
+                        const lipid = createPhospholipid();
+                        lipid.position.set(x + Math.random() * 0.5, 0.8, z + Math.random() * 0.5);
+                        lipid.rotation.x = Math.PI;
+                        lipidGroup.add(lipid);
+                    }
+                }
+            }
+
+            // Bottom layer
+            for (let x = -15; x <= 15; x += 1.5) {
+                for (let z = -4; z <= 4; z += 1.5) {
+                    if (Math.random() > 0.3) {
+                        const lipid = createPhospholipid();
+                        lipid.position.set(x + Math.random() * 0.5, -0.8, z + Math.random() * 0.5);
+                        lipidGroup.add(lipid);
+                    }
+                }
+            }
+
+            // Membrane plane
+            const memPlaneGeom = new THREE.BoxGeometry(32, 1.8, 10);
+            const memPlaneMat = new THREE.MeshPhysicalMaterial({
+                color: 0x065f46,
+                transparent: true,
+                opacity: 0.5,
+                roughness: 0.6
+            });
+            const memPlane = new THREE.Mesh(memPlaneGeom, memPlaneMat);
+            lipidGroup.add(memPlane);
+
+            parent.add(lipidGroup);
+        }
+
+        function createPhospholipid() {
+            const group = new THREE.Group();
+
+            // Head (phosphate group)
+            const headGeom = new THREE.SphereGeometry(0.2, 8, 8);
+            const headMat = new THREE.MeshPhysicalMaterial({
+                color: 0x94a3b8,
+                roughness: 0.3
+            });
+            const head = new THREE.Mesh(headGeom, headMat);
+            group.add(head);
+
+            // Tails
+            const tailMat = new THREE.MeshPhysicalMaterial({
+                color: 0x365314,
+                roughness: 0.7
+            });
+
+            for (let i = 0; i < 2; i++) {
+                const tailGeom = new THREE.CylinderGeometry(0.05, 0.05, 0.6, 4);
+                const tail = new THREE.Mesh(tailGeom, tailMat);
+                tail.position.set((i - 0.5) * 0.15, 0.4, 0);
+                group.add(tail);
+            }
+
+            group.scale.setScalar(0.8);
+            return group;
         }
 
         function createProteinComplexes(parent) {
             // Photosystem II
-            const psii = createPhotosystem(0x7c3aed, 'PSII');
-            psii.position.set(-9, 1.5, 0);
+            const psii = createPhotosystemII();
+            psii.position.set(-12, 0, 0);
             psii.name = 'psii';
             proteinComplexes.psii = psii;
             parent.add(psii);
 
+            // Plastoquinone pool
+            const pq = createPlastoquinonePool();
+            pq.position.set(-7, 0, 0);
+            pq.name = 'pq';
+            proteinComplexes.pq = pq;
+            parent.add(pq);
+
             // Cytochrome b6f
-            const cytb6f = createCytochrome();
-            cytb6f.position.set(-3, 1.2, 0);
+            const cytb6f = createCytochromeb6f();
+            cytb6f.position.set(-2, 0, 0);
             cytb6f.name = 'cytb6f';
             proteinComplexes.cytb6f = cytb6f;
             parent.add(cytb6f);
 
+            // Plastocyanin
+            const pc = createPlastocyanin();
+            pc.position.set(2, 1, 0);
+            pc.name = 'pc';
+            proteinComplexes.pc = pc;
+            parent.add(pc);
+
             // Photosystem I
-            const psi = createPhotosystem(0x2563eb, 'PSI');
-            psi.position.set(3, 1.5, 0);
+            const psi = createPhotosystemI();
+            psi.position.set(6, 0, 0);
             psi.name = 'psi';
             proteinComplexes.psi = psi;
             parent.add(psi);
 
+            // Ferredoxin
+            const fd = createFerredoxin();
+            fd.position.set(10, 2, 0);
+            fd.name = 'fd';
+            proteinComplexes.fd = fd;
+            parent.add(fd);
+
             // ATP Synthase
             const atpSynthase = createATPSynthase();
-            atpSynthase.position.set(9, 0, 0);
+            atpSynthase.position.set(14, 0, 0);
             atpSynthase.name = 'atpSynthase';
             proteinComplexes.atpSynthase = atpSynthase;
             parent.add(atpSynthase);
         }
 
-        function createPhotosystem(color, label) {
+        function createPhotosystemII() {
             const group = new THREE.Group();
 
-            // Main body
-            const bodyGeom = new THREE.CylinderGeometry(1.5, 1.8, 3, 8);
-            const bodyMat = new THREE.MeshPhysicalMaterial({
-                color: color,
+            // D1/D2 core
+            const coreGeom = new THREE.CylinderGeometry(2, 2.2, 3.5, 12);
+            const coreMat = new THREE.MeshPhysicalMaterial({
+                color: 0x7c3aed,
                 roughness: 0.3,
-                metalness: 0.4
+                metalness: 0.3,
+                clearcoat: 0.4
             });
-            const body = new THREE.Mesh(bodyGeom, bodyMat);
-            body.castShadow = true;
-            group.add(body);
+            const core = new THREE.Mesh(coreGeom, coreMat);
+            core.castShadow = true;
+            group.add(core);
 
-            // Antenna complex (light harvesting)
-            for (let i = 0; i < 6; i++) {
-                const angle = (i / 6) * Math.PI * 2;
-                const antennaGeom = new THREE.SphereGeometry(0.4, 16, 16);
-                const antennaMat = new THREE.MeshPhysicalMaterial({
+            // Light-harvesting complex II (LHCII)
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const lhcGeom = new THREE.SphereGeometry(0.5, 12, 12);
+                const lhcMat = new THREE.MeshPhysicalMaterial({
                     color: 0x4ade80,
                     emissive: 0x22c55e,
-                    emissiveIntensity: 0.3,
+                    emissiveIntensity: 0.4,
                     roughness: 0.2
                 });
-                const antenna = new THREE.Mesh(antennaGeom, antennaMat);
-                antenna.position.set(Math.cos(angle) * 2, 1, Math.sin(angle) * 2);
-                group.add(antenna);
+                const lhc = new THREE.Mesh(lhcGeom, lhcMat);
+                lhc.position.set(Math.cos(angle) * 2.8, 1, Math.sin(angle) * 2.8);
+                group.add(lhc);
             }
 
-            // Reaction center
-            const centerGeom = new THREE.SphereGeometry(0.5, 16, 16);
-            const centerMat = new THREE.MeshPhysicalMaterial({
+            // P680 reaction center
+            const p680Geom = new THREE.SphereGeometry(0.4, 12, 12);
+            const p680Mat = new THREE.MeshPhysicalMaterial({
                 color: 0xfbbf24,
                 emissive: 0xf59e0b,
-                emissiveIntensity: 0.5
+                emissiveIntensity: 0.6
             });
-            const center = new THREE.Mesh(centerGeom, centerMat);
-            center.position.y = 1.5;
-            group.add(center);
+            const p680 = new THREE.Mesh(p680Geom, p680Mat);
+            p680.position.y = 1.5;
+            group.add(p680);
+
+            // OEC (Oxygen Evolving Complex)
+            const oecGeom = new THREE.OctahedronGeometry(0.5, 0);
+            const oecMat = new THREE.MeshPhysicalMaterial({
+                color: 0xdc2626,
+                emissive: 0xb91c1c,
+                emissiveIntensity: 0.3,
+                metalness: 0.6
+            });
+            const oec = new THREE.Mesh(oecGeom, oecMat);
+            oec.position.y = -1;
+            oec.rotation.x = Math.PI / 4;
+            group.add(oec);
 
             group.userData = {
-                title: label === 'PSII' ? 'Photosystem II (P680)' : 'Photosystem I (P700)',
-                description: label === 'PSII'
-                    ? 'Absorbs light at 680nm, splits water, and initiates electron transport.'
-                    : 'Absorbs light at 700nm, re-energizes electrons, produces NADPH.'
+                title: 'Photosystem II (P680)',
+                description: 'Absorbs light at 680nm, oxidizes water, and initiates electron transport. Contains the oxygen-evolving complex (OEC).',
+                detail: 'Quantum yield: ~0.9 | Turnover: ~50-400 O₂/s | Redox potential: +1.25V'
             };
 
             return group;
         }
 
-        function createCytochrome() {
+        function createPlastoquinonePool() {
             const group = new THREE.Group();
 
-            // Main body
-            const bodyGeom = new THREE.BoxGeometry(2, 2.5, 2);
+            // Multiple PQ molecules
+            for (let i = 0; i < 6; i++) {
+                const pqGeom = new THREE.TorusGeometry(0.3, 0.12, 8, 16);
+                const pqMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xf97316,
+                    emissive: 0xea580c,
+                    emissiveIntensity: 0.3,
+                    roughness: 0.4
+                });
+                const pq = new THREE.Mesh(pqGeom, pqMat);
+                pq.position.set(
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 1.5,
+                    (Math.random() - 0.5) * 2
+                );
+                pq.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+                group.add(pq);
+            }
+
+            group.userData = {
+                title: 'Plastoquinone Pool (PQ)',
+                description: 'Mobile electron carrier that shuttles electrons from PSII to Cyt b6f. Becomes PQH₂ when reduced.',
+                detail: 'Pool size: ~7 PQ per PSII | Diffusion rate: ~10⁻⁸ cm²/s | Redox potential: +0.11V'
+            };
+
+            return group;
+        }
+
+        function createCytochromeb6f() {
+            const group = new THREE.Group();
+
+            // Main complex
+            const bodyGeom = new THREE.BoxGeometry(2, 3, 2);
             const bodyMat = new THREE.MeshPhysicalMaterial({
                 color: 0xdc2626,
-                roughness: 0.4,
-                metalness: 0.3
+                roughness: 0.35,
+                metalness: 0.4,
+                clearcoat: 0.3
             });
             const body = new THREE.Mesh(bodyGeom, bodyMat);
             body.castShadow = true;
             group.add(body);
 
             // Heme groups
-            for (let i = 0; i < 2; i++) {
-                const hemeGeom = new THREE.TorusGeometry(0.4, 0.1, 8, 16);
+            const hemePositions = [
+                { y: 0.8, color: 0x7f1d1d },
+                { y: 0, color: 0x991b1b },
+                { y: -0.8, color: 0x7f1d1d }
+            ];
+
+            hemePositions.forEach(h => {
+                const hemeGeom = new THREE.TorusGeometry(0.4, 0.08, 8, 16);
                 const hemeMat = new THREE.MeshPhysicalMaterial({
-                    color: 0x7f1d1d,
+                    color: h.color,
                     metalness: 0.8,
-                    roughness: 0.2
+                    roughness: 0.2,
+                    emissive: h.color,
+                    emissiveIntensity: 0.2
                 });
                 const heme = new THREE.Mesh(hemeGeom, hemeMat);
-                heme.position.y = i * 0.8 - 0.4;
+                heme.position.y = h.y;
                 heme.rotation.x = Math.PI / 2;
                 group.add(heme);
-            }
+            });
+
+            // Rieske iron-sulfur cluster
+            const rieskeGeom = new THREE.IcosahedronGeometry(0.25, 0);
+            const rieskeMat = new THREE.MeshPhysicalMaterial({
+                color: 0xfbbf24,
+                emissive: 0xf59e0b,
+                emissiveIntensity: 0.4,
+                metalness: 0.7
+            });
+            const rieske = new THREE.Mesh(rieskeGeom, rieskeMat);
+            rieske.position.set(0.8, 1, 0);
+            group.add(rieske);
 
             group.userData = {
                 title: 'Cytochrome b6f Complex',
-                description: 'Transfers electrons from PSII to PSI while pumping H⁺ into the thylakoid lumen.'
+                description: 'Central hub of electron transport. Oxidizes PQH₂ and reduces plastocyanin while pumping protons via the Q-cycle.',
+                detail: 'Pumps 2H⁺ per electron pair | Contains bₗ, bₕ, f hemes + Rieske [2Fe-2S]'
+            };
+
+            return group;
+        }
+
+        function createPlastocyanin() {
+            const group = new THREE.Group();
+
+            const pcGeom = new THREE.DodecahedronGeometry(0.6, 0);
+            const pcMat = new THREE.MeshPhysicalMaterial({
+                color: 0x06b6d4,
+                emissive: 0x0891b2,
+                emissiveIntensity: 0.4,
+                metalness: 0.5,
+                roughness: 0.2
+            });
+            const pc = new THREE.Mesh(pcGeom, pcMat);
+            group.add(pc);
+
+            // Copper center indication
+            const cuGeom = new THREE.SphereGeometry(0.15, 8, 8);
+            const cuMat = new THREE.MeshPhysicalMaterial({
+                color: 0xfbbf24,
+                emissive: 0xf59e0b,
+                emissiveIntensity: 0.6,
+                metalness: 0.9
+            });
+            const cu = new THREE.Mesh(cuGeom, cuMat);
+            group.add(cu);
+
+            group.userData = {
+                title: 'Plastocyanin (PC)',
+                description: 'Small copper-containing protein that transfers electrons from Cyt b6f to PSI in the thylakoid lumen.',
+                detail: 'MW: 10.5 kDa | Contains 1 Cu atom | Redox potential: +0.37V'
+            };
+
+            return group;
+        }
+
+        function createPhotosystemI() {
+            const group = new THREE.Group();
+
+            // PsaA/PsaB core
+            const coreGeom = new THREE.CylinderGeometry(2.2, 2.4, 3.5, 12);
+            const coreMat = new THREE.MeshPhysicalMaterial({
+                color: 0x2563eb,
+                roughness: 0.3,
+                metalness: 0.3,
+                clearcoat: 0.4
+            });
+            const core = new THREE.Mesh(coreGeom, coreMat);
+            core.castShadow = true;
+            group.add(core);
+
+            // LHCI antenna
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                const lhcGeom = new THREE.SphereGeometry(0.45, 12, 12);
+                const lhcMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x4ade80,
+                    emissive: 0x22c55e,
+                    emissiveIntensity: 0.35,
+                    roughness: 0.2
+                });
+                const lhc = new THREE.Mesh(lhcGeom, lhcMat);
+                lhc.position.set(Math.cos(angle) * 3, 0.5, Math.sin(angle) * 3);
+                group.add(lhc);
+            }
+
+            // P700 reaction center
+            const p700Geom = new THREE.SphereGeometry(0.4, 12, 12);
+            const p700Mat = new THREE.MeshPhysicalMaterial({
+                color: 0x60a5fa,
+                emissive: 0x3b82f6,
+                emissiveIntensity: 0.6
+            });
+            const p700 = new THREE.Mesh(p700Geom, p700Mat);
+            p700.position.y = 1.5;
+            group.add(p700);
+
+            // FA/FB iron-sulfur clusters
+            const faGeom = new THREE.OctahedronGeometry(0.3, 0);
+            const faMat = new THREE.MeshPhysicalMaterial({
+                color: 0xfbbf24,
+                emissive: 0xf59e0b,
+                emissiveIntensity: 0.4,
+                metalness: 0.7
+            });
+            const fa = new THREE.Mesh(faGeom, faMat);
+            fa.position.set(0, 2.2, 0);
+            group.add(fa);
+
+            group.userData = {
+                title: 'Photosystem I (P700)',
+                description: 'Absorbs light at 700nm and reduces ferredoxin. Uses electrons from plastocyanin to generate strong reducing power.',
+                detail: 'Contains P700, A₀, A₁, Fₓ, Fₐ, Fᵦ | Redox span: +0.45V to -1.3V'
+            };
+
+            return group;
+        }
+
+        function createFerredoxin() {
+            const group = new THREE.Group();
+
+            // Protein shell
+            const fdGeom = new THREE.IcosahedronGeometry(0.7, 1);
+            const fdMat = new THREE.MeshPhysicalMaterial({
+                color: 0x84cc16,
+                emissive: 0x65a30d,
+                emissiveIntensity: 0.3,
+                roughness: 0.3
+            });
+            const fd = new THREE.Mesh(fdGeom, fdMat);
+            group.add(fd);
+
+            // [2Fe-2S] cluster
+            const feGeom = new THREE.SphereGeometry(0.15, 8, 8);
+            const feMat = new THREE.MeshPhysicalMaterial({
+                color: 0xb45309,
+                emissive: 0x92400e,
+                emissiveIntensity: 0.5,
+                metalness: 0.8
+            });
+            const fe1 = new THREE.Mesh(feGeom, feMat);
+            fe1.position.set(0.1, 0.1, 0);
+            group.add(fe1);
+            const fe2 = new THREE.Mesh(feGeom.clone(), feMat);
+            fe2.position.set(-0.1, -0.1, 0);
+            group.add(fe2);
+
+            group.userData = {
+                title: 'Ferredoxin (Fd)',
+                description: 'Small iron-sulfur protein that accepts electrons from PSI and donates them to FNR for NADPH production.',
+                detail: 'MW: 11 kDa | [2Fe-2S] cluster | Redox potential: -0.43V'
             };
 
             return group;
@@ -933,56 +1548,72 @@
         function createATPSynthase() {
             const group = new THREE.Group();
 
-            // F0 portion (in membrane)
-            const f0Geom = new THREE.CylinderGeometry(1.2, 1.2, 2, 16);
-            const f0Mat = new THREE.MeshPhysicalMaterial({
-                color: 0xea580c,
-                roughness: 0.4,
+            // CF₀ (membrane portion)
+            const cf0Geom = new THREE.CylinderGeometry(1.4, 1.4, 2.2, 16);
+            const cf0Mat = new THREE.MeshPhysicalMaterial({
+                color: 0xeab308,
+                roughness: 0.35,
                 metalness: 0.3
             });
-            const f0 = new THREE.Mesh(f0Geom, f0Mat);
-            f0.position.y = 0;
-            group.add(f0);
+            const cf0 = new THREE.Mesh(cf0Geom, cf0Mat);
+            group.add(cf0);
 
-            // Stalk
-            const stalkGeom = new THREE.CylinderGeometry(0.3, 0.3, 2, 8);
-            const stalkMat = new THREE.MeshPhysicalMaterial({
-                color: 0xfbbf24,
-                roughness: 0.3
-            });
-            const stalk = new THREE.Mesh(stalkGeom, stalkMat);
-            stalk.position.y = 2;
-            group.add(stalk);
-
-            // F1 head (catalytic)
-            const f1Geom = new THREE.SphereGeometry(1.5, 16, 16);
-            f1Geom.scale(1, 0.7, 1);
-            const f1Mat = new THREE.MeshPhysicalMaterial({
-                color: 0xf97316,
-                roughness: 0.3,
-                metalness: 0.2
-            });
-            const f1 = new THREE.Mesh(f1Geom, f1Mat);
-            f1.position.y = 3.5;
-            f1.name = 'atpSynthaseHead';
-            group.add(f1);
-
-            // Rotor indicator
-            const rotorGeom = new THREE.TorusGeometry(0.8, 0.15, 8, 16);
-            const rotorMat = new THREE.MeshPhysicalMaterial({
+            // c-ring (rotor)
+            const cRingGeom = new THREE.TorusGeometry(0.9, 0.25, 8, 14);
+            const cRingMat = new THREE.MeshPhysicalMaterial({
                 color: 0xfcd34d,
                 emissive: 0xfbbf24,
-                emissiveIntensity: 0.3
+                emissiveIntensity: 0.3,
+                roughness: 0.3
             });
-            const rotor = new THREE.Mesh(rotorGeom, rotorMat);
-            rotor.position.y = -1;
-            rotor.rotation.x = Math.PI / 2;
-            rotor.name = 'atpSynthaseRotor';
-            group.add(rotor);
+            const cRing = new THREE.Mesh(cRingGeom, cRingMat);
+            cRing.rotation.x = Math.PI / 2;
+            cRing.position.y = -1.3;
+            cRing.name = 'cRing';
+            group.add(cRing);
+
+            // γ-stalk
+            const stalkGeom = new THREE.CylinderGeometry(0.25, 0.3, 2.5, 8);
+            const stalkMat = new THREE.MeshPhysicalMaterial({
+                color: 0xf59e0b,
+                roughness: 0.4
+            });
+            const stalk = new THREE.Mesh(stalkGeom, stalkMat);
+            stalk.position.y = 2.3;
+            stalk.name = 'stalk';
+            group.add(stalk);
+
+            // CF₁ head (α₃β₃)
+            const cf1Geom = new THREE.SphereGeometry(1.8, 16, 12);
+            cf1Geom.scale(1, 0.6, 1);
+            const cf1Mat = new THREE.MeshPhysicalMaterial({
+                color: 0xf97316,
+                roughness: 0.3,
+                metalness: 0.2,
+                clearcoat: 0.3
+            });
+            const cf1 = new THREE.Mesh(cf1Geom, cf1Mat);
+            cf1.position.y = 4;
+            cf1.name = 'cf1';
+            group.add(cf1);
+
+            // Subunit indicators on CF1
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                const subGeom = new THREE.SphereGeometry(0.35, 8, 8);
+                const subMat = new THREE.MeshPhysicalMaterial({
+                    color: i % 2 === 0 ? 0xfbbf24 : 0xfcd34d,
+                    roughness: 0.4
+                });
+                const sub = new THREE.Mesh(subGeom, subMat);
+                sub.position.set(Math.cos(angle) * 1.2, 4, Math.sin(angle) * 1.2);
+                group.add(sub);
+            }
 
             group.userData = {
-                title: 'ATP Synthase',
-                description: 'Uses the proton gradient to synthesize ATP. The rotor spins as H⁺ flows through.'
+                title: 'ATP Synthase (CF₀F₁)',
+                description: 'Molecular turbine that synthesizes ATP using the proton gradient. H⁺ flow through CF₀ drives rotation of the γ-stalk, causing conformational changes in CF₁.',
+                detail: 'c₁₄ ring (14 subunits) | ~4 H⁺ per ATP | Rotation: ~100-150 rev/s at full speed'
             };
 
             return group;
@@ -990,105 +1621,247 @@
 
         function createCalvinCycle() {
             const calvinGroup = new THREE.Group();
-            calvinGroup.position.set(15, 3, -5);
+            calvinGroup.position.set(20, 4, -8);
 
-            // Cycle ring
-            const ringGeom = new THREE.TorusGeometry(5, 0.2, 8, 32);
+            // Main cycle ring
+            const ringGeom = new THREE.TorusGeometry(5.5, 0.25, 16, 48);
             const ringMat = new THREE.MeshPhysicalMaterial({
                 color: 0x22d3ee,
+                emissive: 0x06b6d4,
+                emissiveIntensity: 0.3,
                 transparent: true,
-                opacity: 0.6
+                opacity: 0.7
             });
             const ring = new THREE.Mesh(ringGeom, ringMat);
             ring.rotation.x = Math.PI / 2;
             ring.name = 'calvin';
             calvinGroup.add(ring);
 
-            // RuBisCO enzyme (center)
-            const rubiscoGeom = new THREE.IcosahedronGeometry(1.5, 1);
+            // RuBisCO (central enzyme)
+            const rubiscoGeom = new THREE.IcosahedronGeometry(2, 1);
             const rubiscoMat = new THREE.MeshPhysicalMaterial({
                 color: 0xfbbf24,
                 emissive: 0xf59e0b,
                 emissiveIntensity: 0.4,
-                roughness: 0.3
+                roughness: 0.25,
+                metalness: 0.2
             });
             const rubisco = new THREE.Mesh(rubiscoGeom, rubiscoMat);
             rubisco.userData = {
-                title: 'RuBisCO',
-                description: 'The most abundant enzyme on Earth. Catalyzes CO₂ fixation to RuBP.'
+                title: 'RuBisCO (Ribulose-1,5-bisphosphate carboxylase/oxygenase)',
+                description: 'The most abundant enzyme on Earth. Catalyzes CO₂ fixation: RuBP + CO₂ → 2 × 3-PGA',
+                detail: 'L₈S₈ structure | Turnover: ~3 CO₂/s | Also has oxygenase activity (photorespiration)'
             };
             calvinGroup.add(rubisco);
 
-            // Stage markers
+            // Stage markers with molecule representations
             const stages = [
-                { angle: Math.PI / 2, color: 0xef4444, label: 'Fixation' },
-                { angle: -Math.PI / 6, color: 0x3b82f6, label: 'Reduction' },
-                { angle: -5 * Math.PI / 6, color: 0x22c55e, label: 'Regeneration' }
+                { angle: Math.PI / 2, color: 0xef4444, label: 'Carbon Fixation', molecules: ['CO₂', 'RuBP', '3-PGA'] },
+                { angle: -Math.PI / 6, color: 0x3b82f6, label: 'Reduction', molecules: ['ATP', 'NADPH', 'G3P'] },
+                { angle: -5 * Math.PI / 6, color: 0x22c55e, label: 'Regeneration', molecules: ['G3P', 'ATP', 'RuBP'] }
             ];
 
-            stages.forEach(stage => {
-                const markerGeom = new THREE.SphereGeometry(0.6, 16, 16);
+            stages.forEach((stage, i) => {
+                // Stage marker
+                const markerGeom = new THREE.SphereGeometry(0.7, 16, 16);
                 const markerMat = new THREE.MeshPhysicalMaterial({
                     color: stage.color,
                     emissive: stage.color,
-                    emissiveIntensity: 0.3
+                    emissiveIntensity: 0.35
                 });
                 const marker = new THREE.Mesh(markerGeom, markerMat);
-                marker.position.set(Math.cos(stage.angle) * 5, 0, Math.sin(stage.angle) * 5);
+                marker.position.set(Math.cos(stage.angle) * 5.5, 0, Math.sin(stage.angle) * 5.5);
                 calvinGroup.add(marker);
+
+                // Small molecule indicators around each stage
+                stage.molecules.forEach((mol, j) => {
+                    const molGeom = new THREE.SphereGeometry(0.25, 8, 8);
+                    const molMat = new THREE.MeshPhysicalMaterial({
+                        color: stage.color,
+                        transparent: true,
+                        opacity: 0.7
+                    });
+                    const molMesh = new THREE.Mesh(molGeom, molMat);
+                    const subAngle = stage.angle + (j - 1) * 0.3;
+                    molMesh.position.set(
+                        Math.cos(subAngle) * 6.8,
+                        0,
+                        Math.sin(subAngle) * 6.8
+                    );
+                    calvinGroup.add(molMesh);
+                });
             });
 
             proteinComplexes.calvin = calvinGroup;
             chloroplast.add(calvinGroup);
         }
 
-        // Molecule spawning
-        function spawnMolecule(type, startPos, endPos, duration = 2000) {
-            const colors = {
-                water: 0x3b82f6,
-                oxygen: 0xef4444,
-                electron: 0xfef08a,
-                proton: 0xa855f7,
-                atp: 0xf97316,
-                nadph: 0x22c55e,
-                co2: 0x94a3b8,
-                glucose: 0xfde047,
-                photon: 0xfef9c3
-            };
+        function createChloroplastDNA() {
+            const dnaGroup = new THREE.Group();
+            dnaGroup.position.set(-20, 2, 5);
 
-            const sizes = {
-                water: 0.3,
-                oxygen: 0.35,
-                electron: 0.2,
-                proton: 0.2,
-                atp: 0.4,
-                nadph: 0.35,
-                co2: 0.35,
-                glucose: 0.5,
-                photon: 0.25
+            // Circular DNA
+            const dnaGeom = new THREE.TorusGeometry(2, 0.15, 8, 64);
+            const dnaMat = new THREE.MeshPhysicalMaterial({
+                color: 0xf472b6,
+                emissive: 0xec4899,
+                emissiveIntensity: 0.3
+            });
+            const dna = new THREE.Mesh(dnaGeom, dnaMat);
+            dna.rotation.x = Math.PI / 2 + 0.3;
+            dna.name = 'dna';
+            dna.userData = {
+                title: 'Chloroplast DNA (cpDNA)',
+                description: 'Circular chromosome (~120-180 kb) encoding ~100-120 genes for photosynthesis proteins, rRNAs, and tRNAs.',
+                detail: 'Multiple copies per chloroplast | Prokaryotic-type replication | Evidence of endosymbiotic origin'
             };
+            dnaGroup.add(dna);
 
-            const geom = new THREE.SphereGeometry(sizes[type] || 0.3, 16, 16);
-            const mat = new THREE.MeshPhysicalMaterial({
-                color: colors[type],
-                emissive: colors[type],
-                emissiveIntensity: type === 'photon' ? 1 : 0.5,
+            // Secondary strand
+            const dna2Geom = new THREE.TorusGeometry(1.8, 0.1, 8, 64);
+            const dna2 = new THREE.Mesh(dna2Geom, dnaMat);
+            dna2.rotation.x = Math.PI / 2 - 0.2;
+            dnaGroup.add(dna2);
+
+            proteinComplexes.dna = dnaGroup;
+            chloroplast.add(dnaGroup);
+        }
+
+        function createStarchGranules() {
+            const starchGroup = new THREE.Group();
+
+            const positions = [
+                { x: 18, y: 0, z: 8 },
+                { x: 22, y: -1, z: 3 },
+                { x: -5, y: 1, z: -12 }
+            ];
+
+            positions.forEach((pos, i) => {
+                const starchGeom = new THREE.SphereGeometry(1.5 + Math.random() * 0.5, 16, 16);
+                starchGeom.scale(1, 0.7, 1);
+                const starchMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xfef3c7,
+                    roughness: 0.8,
+                    transparent: true,
+                    opacity: 0.85
+                });
+                const starch = new THREE.Mesh(starchGeom, starchMat);
+                starch.position.set(pos.x, pos.y, pos.z);
+                starch.name = i === 0 ? 'starch' : `starch${i}`;
+                starch.userData = {
+                    title: 'Starch Granule',
+                    description: 'Storage form of glucose (α-1,4 and α-1,6 linked). Accumulates when photosynthesis exceeds immediate energy needs.',
+                    detail: 'Contains amylose (linear) and amylopectin (branched) | Degraded at night for respiration'
+                };
+                starchGroup.add(starch);
+            });
+
+            proteinComplexes.starch = starchGroup;
+            chloroplast.add(starchGroup);
+        }
+
+        function createRibosomes() {
+            const riboGroup = new THREE.Group();
+
+            for (let i = 0; i < 15; i++) {
+                const riboGeom = new THREE.SphereGeometry(0.3, 8, 8);
+                const riboMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x9ca3af,
+                    roughness: 0.6
+                });
+                const ribo = new THREE.Mesh(riboGeom, riboMat);
+
+                // Random position within chloroplast
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 8 + Math.random() * 15;
+                ribo.position.set(
+                    Math.cos(angle) * radius * 0.8,
+                    -2 + Math.random() * 6,
+                    Math.sin(angle) * radius * 0.5
+                );
+                riboGroup.add(ribo);
+            }
+
+            chloroplast.add(riboGroup);
+        }
+
+        function createAmbientParticles() {
+            // Stromal particles (enzymes, metabolites)
+            const particleCount = 200;
+            const particleGeom = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 25;
+                positions[i * 3] = Math.cos(angle) * radius;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 8;
+                positions[i * 3 + 2] = Math.sin(angle) * radius * 0.6;
+
+                const color = new THREE.Color().setHSL(0.35 + Math.random() * 0.1, 0.6, 0.5);
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+            }
+
+            particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const particleMat = new THREE.PointsMaterial({
+                size: 0.15,
+                vertexColors: true,
                 transparent: true,
-                opacity: 0.9
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            const particleSystem = new THREE.Points(particleGeom, particleMat);
+            particleSystem.name = 'ambientParticles';
+            chloroplast.add(particleSystem);
+        }
+
+        // Molecule spawning with more types
+        function spawnMolecule(type, startPos, endPos, duration = 2000) {
+            const configs = {
+                photon: { color: 0xfef9c3, emissive: 0xfef08a, size: 0.3, glow: true },
+                water: { color: 0x3b82f6, emissive: 0x2563eb, size: 0.35, glow: false },
+                oxygen: { color: 0xef4444, emissive: 0xdc2626, size: 0.4, glow: true },
+                electron: { color: 0xfef08a, emissive: 0xfacc15, size: 0.2, glow: true },
+                proton: { color: 0xa855f7, emissive: 0x9333ea, size: 0.2, glow: true },
+                pqh2: { color: 0xf97316, emissive: 0xea580c, size: 0.35, glow: false },
+                pc: { color: 0x06b6d4, emissive: 0x0891b2, size: 0.3, glow: true },
+                fd: { color: 0x84cc16, emissive: 0x65a30d, size: 0.3, glow: true },
+                atp: { color: 0xf97316, emissive: 0xea580c, size: 0.45, glow: true },
+                nadph: { color: 0x22c55e, emissive: 0x16a34a, size: 0.4, glow: true },
+                co2: { color: 0x94a3b8, emissive: 0x64748b, size: 0.35, glow: false },
+                glucose: { color: 0xfde047, emissive: 0xfacc15, size: 0.6, glow: true },
+                pga: { color: 0xef4444, emissive: 0xdc2626, size: 0.3, glow: false },
+                g3p: { color: 0x22c55e, emissive: 0x16a34a, size: 0.3, glow: false }
+            };
+
+            const config = configs[type] || configs.electron;
+
+            const geom = new THREE.SphereGeometry(config.size, 12, 12);
+            const mat = new THREE.MeshPhysicalMaterial({
+                color: config.color,
+                emissive: config.emissive,
+                emissiveIntensity: config.glow ? 0.8 : 0.3,
+                transparent: true,
+                opacity: 0
             });
             const molecule = new THREE.Mesh(geom, mat);
             molecule.position.copy(startPos);
 
-            // Add glow
-            if (['electron', 'photon', 'atp'].includes(type)) {
-                const glowGeom = new THREE.SphereGeometry(sizes[type] * 2, 16, 16);
+            if (config.glow) {
+                const glowGeom = new THREE.SphereGeometry(config.size * 2.5, 12, 12);
                 const glowMat = new THREE.MeshBasicMaterial({
-                    color: colors[type],
+                    color: config.emissive,
                     transparent: true,
-                    opacity: 0.3
+                    opacity: 0.2,
+                    blending: THREE.AdditiveBlending
                 });
-                const glow = new THREE.Mesh(glowGeom, glowMat);
-                molecule.add(glow);
+                molecule.add(new THREE.Mesh(glowGeom, glowMat));
             }
 
             scene.add(molecule);
@@ -1112,13 +1885,15 @@
                     return false;
                 }
 
-                // Smooth easing
                 const t = mol.progress;
-                const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
                 mol.mesh.position.lerpVectors(mol.start, mol.end, ease);
-                mol.mesh.material.opacity = mol.progress < 0.1 ? mol.progress * 9 :
-                                            mol.progress > 0.9 ? (1 - mol.progress) * 9 : 0.9;
+
+                // Fade in/out
+                const opacity = mol.progress < 0.15 ? mol.progress / 0.15 :
+                               mol.progress > 0.85 ? (1 - mol.progress) / 0.15 : 1;
+                mol.mesh.material.opacity = opacity * 0.9;
 
                 return true;
             });
@@ -1127,132 +1902,173 @@
         function runLightReactions() {
             if (!isRunning) return;
 
-            const baseY = -5;
+            const eff = getEfficiency();
+            if (Math.random() > eff) return;
 
-            // Photon hitting PSII
-            spawnMolecule('photon',
-                new THREE.Vector3(-9, 15, 0),
-                new THREE.Vector3(-9, baseY + 3, 0),
-                1500
-            );
+            const baseY = -6;
+            const wavelengthColor = wavelengthToColor(wavelength);
 
-            // Water entering
+            // Photon to PSII
+            spawnMolecule('photon', new THREE.Vector3(-12, 20, 0), new THREE.Vector3(-12, baseY + 4, 0), 1200);
+
+            // Water oxidation at OEC
             setTimeout(() => {
                 if (!isRunning) return;
-                spawnMolecule('water',
-                    new THREE.Vector3(-15, baseY, 0),
-                    new THREE.Vector3(-9, baseY, 0),
-                    1000
-                );
+                spawnMolecule('water', new THREE.Vector3(-18, baseY - 2, 0), new THREE.Vector3(-12, baseY - 1, 0), 800);
                 counts.water++;
                 updateCounter('waterCount', counts.water);
-            }, 500);
+            }, 400);
 
-            // Oxygen released
+            // Oxygen release
             setTimeout(() => {
                 if (!isRunning) return;
-                spawnMolecule('oxygen',
-                    new THREE.Vector3(-9, baseY + 2, 0),
-                    new THREE.Vector3(-9, 15, 3),
-                    2000
-                );
+                spawnMolecule('oxygen', new THREE.Vector3(-12, baseY, 0), new THREE.Vector3(-12, 20, 2), 1800);
                 counts.o2++;
                 updateCounter('o2Count', counts.o2);
-            }, 1200);
-
-            // Electron to Cyt b6f
-            setTimeout(() => {
-                if (!isRunning) return;
-                spawnMolecule('electron',
-                    new THREE.Vector3(-9, baseY + 2, 0),
-                    new THREE.Vector3(-3, baseY + 1.5, 0),
-                    800
-                );
             }, 1000);
 
-            // Proton pumped
+            // Electron to PQ pool
             setTimeout(() => {
                 if (!isRunning) return;
-                spawnMolecule('proton',
-                    new THREE.Vector3(-3, baseY + 1, 0),
-                    new THREE.Vector3(-3, baseY - 1.5, 0),
-                    600
-                );
-            }, 1500);
+                spawnMolecule('electron', new THREE.Vector3(-12, baseY + 2, 0), new THREE.Vector3(-7, baseY, 0), 600);
+            }, 800);
 
-            // Electron to PSI
+            // PQH2 to Cyt b6f
             setTimeout(() => {
                 if (!isRunning) return;
-                spawnMolecule('electron',
-                    new THREE.Vector3(-3, baseY + 1.5, 0),
-                    new THREE.Vector3(3, baseY + 2, 0),
-                    800
-                );
-                // Photon hitting PSI
-                spawnMolecule('photon',
-                    new THREE.Vector3(3, 15, 0),
-                    new THREE.Vector3(3, baseY + 3, 0),
-                    1500
-                );
+                spawnMolecule('pqh2', new THREE.Vector3(-7, baseY, 0), new THREE.Vector3(-2, baseY, 0), 700);
+            }, 1200);
+
+            // Protons pumped at Cyt b6f
+            setTimeout(() => {
+                if (!isRunning) return;
+                spawnMolecule('proton', new THREE.Vector3(-2, baseY + 1, 0), new THREE.Vector3(-2, baseY - 2, 0), 500);
+                spawnMolecule('proton', new THREE.Vector3(-2, baseY + 1, 1), new THREE.Vector3(-2, baseY - 2, 1), 600);
+                protonGradient = Math.min(100, protonGradient + 5);
+                updateProtonGradient();
+            }, 1600);
+
+            // Plastocyanin shuttle
+            setTimeout(() => {
+                if (!isRunning) return;
+                spawnMolecule('pc', new THREE.Vector3(-2, baseY - 1, 0), new THREE.Vector3(6, baseY - 1, 0), 800);
+            }, 1800);
+
+            // Photon to PSI
+            setTimeout(() => {
+                if (!isRunning) return;
+                spawnMolecule('photon', new THREE.Vector3(6, 20, 0), new THREE.Vector3(6, baseY + 4, 0), 1200);
             }, 2000);
 
-            // NADPH produced
+            // Electron to Ferredoxin
             setTimeout(() => {
                 if (!isRunning) return;
-                spawnMolecule('nadph',
-                    new THREE.Vector3(3, baseY + 3, 0),
-                    new THREE.Vector3(15, 3, -5),
-                    1500
-                );
+                spawnMolecule('electron', new THREE.Vector3(6, baseY + 2, 0), new THREE.Vector3(10, baseY + 2, 0), 500);
+            }, 2500);
+
+            // Ferredoxin to FNR, NADPH production
+            setTimeout(() => {
+                if (!isRunning) return;
+                spawnMolecule('fd', new THREE.Vector3(10, baseY + 2, 0), new THREE.Vector3(13, baseY + 4, 0), 600);
+            }, 2800);
+
+            setTimeout(() => {
+                if (!isRunning) return;
+                spawnMolecule('nadph', new THREE.Vector3(13, baseY + 4, 0), new THREE.Vector3(20, 4, -8), 1200);
                 counts.nadph++;
                 updateCounter('nadphCount', counts.nadph);
-            }, 3000);
+            }, 3200);
 
-            // ATP produced
+            // ATP synthesis
             setTimeout(() => {
                 if (!isRunning) return;
-                spawnMolecule('proton',
-                    new THREE.Vector3(9, baseY - 1.5, 0),
-                    new THREE.Vector3(9, baseY + 1, 0),
-                    600
-                );
-                setTimeout(() => {
-                    spawnMolecule('atp',
-                        new THREE.Vector3(9, baseY + 4, 0),
-                        new THREE.Vector3(15, 3, -5),
-                        1500
-                    );
-                    counts.atp++;
-                    updateCounter('atpCount', counts.atp);
-                }, 700);
+                if (protonGradient > 20) {
+                    spawnMolecule('proton', new THREE.Vector3(14, baseY - 2, 0), new THREE.Vector3(14, baseY + 2, 0), 500);
+                    protonGradient = Math.max(0, protonGradient - 8);
+                    updateProtonGradient();
+
+                    setTimeout(() => {
+                        spawnMolecule('atp', new THREE.Vector3(14, baseY + 5, 0), new THREE.Vector3(20, 4, -8), 1000);
+                        counts.atp++;
+                        updateCounter('atpCount', counts.atp);
+                    }, 600);
+                }
             }, 3500);
         }
 
         function runCalvinCycle() {
             if (!isRunning) return;
 
+            const eff = getEfficiency();
+            if (Math.random() > eff * (co2Level / 400)) return;
+
             // CO2 entering
-            spawnMolecule('co2',
-                new THREE.Vector3(25, 10, -5),
-                new THREE.Vector3(15, 3, -5),
-                2000
-            );
+            spawnMolecule('co2', new THREE.Vector3(30, 12, -8), new THREE.Vector3(20, 4, -8), 1500);
             counts.co2++;
             updateCounter('co2Count', counts.co2);
+
+            // 3-PGA formation (after fixation)
+            setTimeout(() => {
+                if (!isRunning) return;
+                const angle = Math.PI / 2;
+                spawnMolecule('pga',
+                    new THREE.Vector3(20, 4, -8),
+                    new THREE.Vector3(20 + Math.cos(angle) * 5.5, 4, -8 + Math.sin(angle) * 5.5),
+                    800
+                );
+            }, 1000);
+
+            // G3P formation (after reduction)
+            setTimeout(() => {
+                if (!isRunning) return;
+                const angle = -Math.PI / 6;
+                spawnMolecule('g3p',
+                    new THREE.Vector3(20 + Math.cos(Math.PI / 2) * 5.5, 4, -8 + Math.sin(Math.PI / 2) * 5.5),
+                    new THREE.Vector3(20 + Math.cos(angle) * 5.5, 4, -8 + Math.sin(angle) * 5.5),
+                    1000
+                );
+            }, 2000);
 
             // Glucose output (every 6 CO2)
             if (counts.co2 % 6 === 0 && counts.co2 > 0) {
                 setTimeout(() => {
                     if (!isRunning) return;
-                    spawnMolecule('glucose',
-                        new THREE.Vector3(15, 3, -5),
-                        new THREE.Vector3(25, 0, 10),
-                        2500
-                    );
+                    spawnMolecule('glucose', new THREE.Vector3(20, 4, -8), new THREE.Vector3(30, 0, 5), 2000);
                     counts.glucose++;
                     updateCounter('glucoseCount', counts.glucose);
-                }, 3000);
+                }, 3500);
             }
+        }
+
+        function wavelengthToColor(wl) {
+            let r, g, b;
+            if (wl >= 380 && wl < 440) {
+                r = -(wl - 440) / (440 - 380); g = 0; b = 1;
+            } else if (wl >= 440 && wl < 490) {
+                r = 0; g = (wl - 440) / (490 - 440); b = 1;
+            } else if (wl >= 490 && wl < 510) {
+                r = 0; g = 1; b = -(wl - 510) / (510 - 490);
+            } else if (wl >= 510 && wl < 580) {
+                r = (wl - 510) / (580 - 510); g = 1; b = 0;
+            } else if (wl >= 580 && wl < 645) {
+                r = 1; g = -(wl - 645) / (645 - 580); b = 0;
+            } else {
+                r = 1; g = 0; b = 0;
+            }
+            return new THREE.Color(r, g, b);
+        }
+
+        function updateProtonGradient() {
+            const gradientEl = document.getElementById('protonGradient');
+            gradientEl.style.width = protonGradient + '%';
+
+            // Calculate PMF (proton motive force)
+            const pmf = Math.round(protonGradient * 2);
+            document.getElementById('pmfValue').textContent = pmf;
+
+            // ATP production rate
+            const atpRate = protonGradient > 20 ? Math.round(protonGradient / 10) : 0;
+            document.getElementById('atpRate').textContent = atpRate;
         }
 
         // Animation loop
@@ -1267,52 +2083,64 @@
 
             controls.update();
 
-            // Rotate ATP synthase rotor
+            if (autoRotate) {
+                chloroplast.rotation.y += delta * 0.1;
+            }
+
+            // Rotate ATP synthase components
             if (isRunning && proteinComplexes.atpSynthase) {
-                const rotor = proteinComplexes.atpSynthase.getObjectByName('atpSynthaseRotor');
-                if (rotor) {
-                    rotor.rotation.z += delta * 3 * simulationSpeed;
+                const cRing = proteinComplexes.atpSynthase.getObjectByName('cRing');
+                const stalk = proteinComplexes.atpSynthase.getObjectByName('stalk');
+                if (cRing && protonGradient > 10) {
+                    const rotationSpeed = (protonGradient / 100) * 4 * simulationSpeed;
+                    cRing.rotation.z += delta * rotationSpeed;
+                    if (stalk) stalk.rotation.y += delta * rotationSpeed;
                 }
+            }
+
+            // Animate ambient particles
+            const particles = chloroplast.getObjectByName('ambientParticles');
+            if (particles && isRunning) {
+                particles.rotation.y += delta * 0.02 * simulationSpeed;
             }
 
             // Spawn molecules
             if (isRunning) {
-                if (elapsed - lastSpawnTime > 2 / simulationSpeed) {
-                    if (Math.random() < lightIntensity / 100) {
-                        runLightReactions();
-                    }
-                    if (Math.random() < co2Level / 400) {
-                        runCalvinCycle();
-                    }
+                const spawnInterval = 1.8 / simulationSpeed;
+                if (elapsed - lastSpawnTime > spawnInterval) {
+                    runLightReactions();
+                    runCalvinCycle();
                     lastSpawnTime = elapsed;
                 }
 
                 // Update process description
-                if (elapsed - lastProcessTime > 4 / simulationSpeed) {
+                if (elapsed - lastProcessTime > 5 / simulationSpeed) {
                     currentProcess = (currentProcess + 1) % processDescriptions.length;
-                    document.getElementById('processInfo').innerHTML = processDescriptions[currentProcess];
+                    const proc = processDescriptions[currentProcess];
+                    document.getElementById('processInfo').innerHTML =
+                        `<strong>${proc.title}</strong><br>${proc.text}<br><em style="color:#64748b;font-size:0.75rem">${proc.detail}</em>`;
                     lastProcessTime = elapsed;
+                }
+
+                // Gradual proton leak
+                if (Math.random() < 0.1) {
+                    protonGradient = Math.max(0, protonGradient - 0.5);
+                    updateProtonGradient();
                 }
             }
 
-            // Update molecules
             updateMolecules(delta);
-
             renderer.render(scene, camera);
         }
 
-        // Controls
+        // UI Controls
         function toggleSimulation() {
             isRunning = !isRunning;
             const btn = document.getElementById('playPauseBtn');
-
-            if (isRunning) {
-                btn.textContent = '⏸ Pause';
-                btn.style.background = 'linear-gradient(135deg, #f97316, #ea580c)';
-            } else {
-                btn.textContent = '▶ Start';
-                btn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
-            }
+            btn.textContent = isRunning ? '⏸ Pause' : '▶ Start';
+            btn.style.background = isRunning
+                ? 'linear-gradient(135deg, #f97316, #ea580c)'
+                : 'linear-gradient(135deg, #4ade80, #22c55e)';
         }
 
         function resetSimulation() {
@@ -1320,31 +2148,46 @@
             document.getElementById('playPauseBtn').textContent = '▶ Start';
             document.getElementById('playPauseBtn').style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
 
-            // Clear molecules
             molecules.forEach(mol => scene.remove(mol.mesh));
             molecules = [];
 
-            // Reset counters
             counts = { o2: 0, atp: 0, nadph: 0, glucose: 0, water: 0, co2: 0 };
-            updateCounter('o2Count', 0);
-            updateCounter('atpCount', 0);
-            updateCounter('nadphCount', 0);
-            updateCounter('glucoseCount', 0);
-            updateCounter('waterCount', 0);
-            updateCounter('co2Count', 0);
+            Object.keys(counts).forEach(k => updateCounter(k + 'Count', 0));
+
+            protonGradient = 0;
+            updateProtonGradient();
 
             document.getElementById('processInfo').innerHTML =
-                'Click <strong>Start</strong> to begin. Light energy drives electron transport in the thylakoid membrane, producing ATP and NADPH. These power the Calvin Cycle in the stroma to fix CO₂ into glucose.';
+                'Click <strong>Start</strong> to begin the simulation. Light energy excites electrons in chlorophyll, initiating the electron transport chain. The resulting proton gradient drives ATP synthesis via chemiosmosis.';
         }
 
         function updateLight(value) {
             lightIntensity = parseInt(value);
-            document.getElementById('lightValue').textContent = value + '%';
+            document.getElementById('lightValue').textContent = value + ' μmol·m⁻²·s⁻¹';
+        }
+
+        function updateWavelength(value) {
+            wavelength = parseInt(value);
+            let colorName = 'Green';
+            if (value < 450) colorName = 'Violet';
+            else if (value < 495) colorName = 'Blue';
+            else if (value < 570) colorName = 'Green';
+            else if (value < 590) colorName = 'Yellow';
+            else if (value < 620) colorName = 'Orange';
+            else colorName = 'Red';
+
+            document.getElementById('wavelengthValue').textContent = value + ' nm (' + colorName + ')';
+            document.getElementById('spectrumIndicator').style.left = ((value - 400) / 300 * 100) + '%';
         }
 
         function updateCO2(value) {
             co2Level = parseInt(value);
             document.getElementById('co2Value').textContent = value + ' ppm';
+        }
+
+        function updateTemp(value) {
+            temperature = parseInt(value);
+            document.getElementById('tempValue').textContent = value + '°C';
         }
 
         function updateSpeed(value) {
@@ -1356,55 +2199,27 @@
             document.getElementById(id).textContent = value;
         }
 
+        function toggleAutoRotate() {
+            autoRotate = !autoRotate;
+        }
+
         // View controls
         function setView(view) {
-            const duration = 1000;
-            let targetPos, targetLook;
+            const views = {
+                overview: { pos: [35, 25, 45], target: [0, 0, 0] },
+                membrane: { pos: [0, 8, 25], target: [0, -6, 0] },
+                etc: { pos: [5, 0, 18], target: [0, -6, 0] },
+                calvin: { pos: [30, 12, 2], target: [20, 4, -8] },
+                cross: { pos: [50, 0, 0], target: [0, 0, 0] }
+            };
 
-            switch(view) {
-                case 'overview':
-                    targetPos = { x: 30, y: 20, z: 40 };
-                    targetLook = { x: 0, y: 0, z: 0 };
-                    break;
-                case 'membrane':
-                    targetPos = { x: 0, y: 5, z: 20 };
-                    targetLook = { x: 0, y: -5, z: 0 };
-                    break;
-                case 'calvin':
-                    targetPos = { x: 25, y: 10, z: 5 };
-                    targetLook = { x: 15, y: 3, z: -5 };
-                    break;
-                case 'cross':
-                    targetPos = { x: 40, y: 0, z: 0 };
-                    targetLook = { x: 0, y: 0, z: 0 };
-                    break;
-            }
+            const v = views[view];
+            if (!v) return;
 
-            // Animate camera
-            const startPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
-            const startTime = performance.now();
-
-            function animateCamera() {
-                const elapsed = performance.now() - startTime;
-                const t = Math.min(elapsed / duration, 1);
-                const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-
-                camera.position.x = startPos.x + (targetPos.x - startPos.x) * ease;
-                camera.position.y = startPos.y + (targetPos.y - startPos.y) * ease;
-                camera.position.z = startPos.z + (targetPos.z - startPos.z) * ease;
-
-                controls.target.set(
-                    targetLook.x,
-                    targetLook.y,
-                    targetLook.z
-                );
-
-                if (t < 1) {
-                    requestAnimationFrame(animateCamera);
-                }
-            }
-
-            animateCamera();
+            animateCamera(
+                new THREE.Vector3(...v.pos),
+                new THREE.Vector3(...v.target)
+            );
         }
 
         function focusOn(target) {
@@ -1412,19 +2227,15 @@
             if (obj) {
                 const pos = new THREE.Vector3();
                 obj.getWorldPosition(pos);
-                setViewToPosition(pos);
+                const camPos = pos.clone().add(new THREE.Vector3(8, 6, 8));
+                animateCamera(camPos, pos);
             }
         }
 
-        function setViewToPosition(pos) {
-            const targetPos = {
-                x: pos.x + 10,
-                y: pos.y + 8,
-                z: pos.z + 10
-            };
-
-            const startPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
-            const duration = 800;
+        function animateCamera(targetPos, targetLook) {
+            const startPos = camera.position.clone();
+            const startLook = controls.target.clone();
+            const duration = 1000;
             const startTime = performance.now();
 
             function animate() {
@@ -1432,19 +2243,15 @@
                 const t = Math.min(elapsed / duration, 1);
                 const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-                camera.position.x = startPos.x + (targetPos.x - startPos.x) * ease;
-                camera.position.y = startPos.y + (targetPos.y - startPos.y) * ease;
-                camera.position.z = startPos.z + (targetPos.z - startPos.z) * ease;
-
-                controls.target.copy(pos);
+                camera.position.lerpVectors(startPos, targetPos, ease);
+                controls.target.lerpVectors(startLook, targetLook, ease);
 
                 if (t < 1) requestAnimationFrame(animate);
             }
-
             animate();
         }
 
-        // Tooltip
+        // Interaction
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
@@ -1465,15 +2272,35 @@
 
                 if (obj && obj.userData.title) {
                     tooltip.classList.add('visible');
-                    tooltip.style.left = event.clientX + 15 + 'px';
-                    tooltip.style.top = event.clientY + 15 + 'px';
+                    tooltip.style.left = Math.min(event.clientX + 15, window.innerWidth - 300) + 'px';
+                    tooltip.style.top = Math.min(event.clientY + 15, window.innerHeight - 150) + 'px';
                     document.getElementById('tooltipTitle').textContent = obj.userData.title;
                     document.getElementById('tooltipContent').textContent = obj.userData.description;
+                    document.getElementById('tooltipDetail').textContent = obj.userData.detail || '';
                 } else {
                     tooltip.classList.remove('visible');
                 }
             } else {
                 tooltip.classList.remove('visible');
+            }
+        }
+
+        function onClick(event) {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                while (obj && !obj.userData.title) {
+                    obj = obj.parent;
+                }
+
+                if (obj && obj.userData.title) {
+                    const pos = new THREE.Vector3();
+                    obj.getWorldPosition(pos);
+                    const camPos = pos.clone().add(new THREE.Vector3(6, 4, 6));
+                    animateCamera(camPos, pos);
+                }
             }
         }
 
@@ -1483,7 +2310,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // Initialize on load
+        // Initialize
         init();
     </script>
 </body>
