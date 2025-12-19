@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0f;
+            background: #1e3a5f;
             overflow: hidden;
             color: #fff;
         }
@@ -436,7 +436,7 @@
         .loading {
             position: fixed;
             inset: 0;
-            background: #0a0a0f;
+            background: #1e3a5f;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -890,8 +890,8 @@
         // Initialize
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x050510);
-            scene.fog = new THREE.FogExp2(0x050510, 0.015);
+            scene.background = new THREE.Color(0x1e3a5f);
+            scene.fog = new THREE.FogExp2(0x1e3a5f, 0.008);
 
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
             camera.position.set(35, 25, 45);
@@ -928,10 +928,10 @@
         }
 
         function setupLighting() {
-            const ambient = new THREE.AmbientLight(0x303050, 0.4);
+            const ambient = new THREE.AmbientLight(0x87ceeb, 0.7);
             scene.add(ambient);
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
             sunLight.position.set(30, 50, 30);
             sunLight.castShadow = true;
             sunLight.shadow.mapSize.width = 2048;
@@ -940,15 +940,25 @@
             sunLight.shadow.camera.far = 100;
             scene.add(sunLight);
 
+            // Secondary sun from opposite side
+            const sunLight2 = new THREE.DirectionalLight(0xffffee, 0.6);
+            sunLight2.position.set(-20, 30, -20);
+            scene.add(sunLight2);
+
             // Green-tinted fill light (chlorophyll glow)
-            const chloroLight = new THREE.PointLight(0x22c55e, 0.6, 60);
+            const chloroLight = new THREE.PointLight(0x22c55e, 0.8, 80);
             chloroLight.position.set(0, 5, 0);
             scene.add(chloroLight);
 
             // Blue accent light
-            const blueLight = new THREE.PointLight(0x3b82f6, 0.3, 50);
+            const blueLight = new THREE.PointLight(0x3b82f6, 0.5, 60);
             blueLight.position.set(-20, 0, 20);
             scene.add(blueLight);
+
+            // Warm fill from below
+            const warmLight = new THREE.PointLight(0xffd700, 0.3, 50);
+            warmLight.position.set(0, -10, 0);
+            scene.add(warmLight);
         }
 
         function createChloroplast() {
